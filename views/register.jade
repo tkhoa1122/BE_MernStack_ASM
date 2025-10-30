@@ -1,0 +1,81 @@
+extends layout
+
+block content
+  .hero.min-h-screen.bg-base-200
+    .hero-content.flex-col.gap-12(class='lg:flex-row')
+      .text-center.max-w-md(class='lg:text-left')
+        h1.text-5xl.font-bold Tham Gia Cùng Chúng Tôi!
+        p.py-6.text-lg Tạo tài khoản để trải nghiệm những mùi hương độc đáo và nhận ưu đãi đặc biệt
+        .space-y-4
+          .flex.items-start.gap-3
+            .badge.badge-primary.badge-lg
+              i.fas.fa-check
+            div
+              h3.font-bold Miễn phí hoàn toàn
+              p.text-sm.opacity-70 Không mất phí đăng ký
+          .flex.items-start.gap-3
+            .badge.badge-primary.badge-lg
+              i.fas.fa-check
+            div
+              h3.font-bold Đánh giá sản phẩm
+              p.text-sm.opacity-70 Chia sẻ trải nghiệm của bạn
+          .flex.items-start.gap-3
+            .badge.badge-primary.badge-lg
+              i.fas.fa-check
+            div
+              h3.font-bold Theo dõi yêu thích
+              p.text-sm.opacity-70 Lưu các sản phẩm ưa thích
+      .card.flex-shrink-0.w-full.max-w-md.shadow-2xl.bg-base-100
+        form.card-body(method='post', action='/register')
+          .text-center.mb-4
+            h2.text-2xl.font-bold Đăng Ký Tài Khoản
+            p.text-sm.opacity-70 Điền thông tin để bắt đầu
+          if error
+            .alert.alert-error
+              i.fas.fa-exclamation-circle
+              span= error
+          .form-control
+            label.label
+              span.label-text
+                i.fas.fa-user.mr-2
+                | Họ và tên
+            input.input.input-bordered.input-primary(type='text', name='name', placeholder='Nguyễn Văn A', required, autofocus)
+          .form-control
+            label.label
+              span.label-text
+                i.fas.fa-envelope.mr-2
+                | Email
+            input.input.input-bordered.input-primary(type='email', name='email', placeholder='your@email.com', required)
+          .form-control
+            label.label
+              span.label-text
+                i.fas.fa-lock.mr-2
+                | Mật khẩu
+            input.input.input-bordered.input-primary(type='password', name='password', placeholder='Tối thiểu 6 ký tự', required, minlength='6')
+            label.label
+              span.label-text-alt.opacity-70 Ít nhất 6 ký tự
+          .form-control
+            label.label
+              span.label-text
+                i.fas.fa-calendar.mr-2
+                | Năm sinh
+            input.input.input-bordered(type='number', name='YOB', placeholder='Ví dụ: 1990', min='1900', max='2100')
+          
+          .form-control
+            label.label
+              span.label-text
+                i.fas.fa-venus-mars.mr-2
+                | Giới tính
+            select.select.select-bordered(name='gender', id='genderSelect')
+              option(value='') Không xác định
+              option(value='true') Nam
+              option(value='false') Nữ
+          .form-control.mt-6
+            button.btn.btn-primary.btn-block(type='submit')
+              i.fas.fa-user-plus.mr-2
+              | Tạo Tài Khoản
+          .divider
+          .text-center
+            p.text-sm
+              | Đã có tài khoản? 
+              a.link.link-primary.font-semibold(href='/login') Đăng nhập ngay

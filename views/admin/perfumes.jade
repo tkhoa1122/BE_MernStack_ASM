@@ -1,0 +1,72 @@
+extends ../layout
+
+block content
+  .container.mx-auto.px-4.py-8
+    // Header
+    .flex.items-center.justify-between.mb-8
+      div
+        h1.text-4xl.font-bold.mb-2
+          i.fas.fa-spray-can.mr-3
+          | Quản Lý Sản Phẩm
+        p.text-lg.opacity-70 Quản lý các sản phẩm nước hoa
+      .flex.gap-3
+        a.btn.btn-ghost(href='/dashboard')
+          i.fas.fa-arrow-left.mr-2
+          | Về Dashboard
+        a.btn.btn-primary(href='/dashboard/perfumes/new')
+          i.fas.fa-plus.mr-2
+          | Thêm Sản Phẩm Mới
+
+    .card.bg-base-100.shadow-xl
+      .card-body
+        if perfumes && perfumes.length
+          .overflow-x-auto
+            table.table.table-zebra
+              thead
+                tr
+                  th STT
+                  th
+                    i.fas.fa-spray-can.mr-2
+                    | Tên Sản Phẩm
+                  th
+                    i.fas.fa-tag.mr-2
+                    | Thương Hiệu
+                  th
+                    i.fas.fa-venus-mars.mr-2
+                    | Đối Tượng
+                  th
+                    i.fas.fa-dollar-sign.mr-2
+                    | Giá
+                  th
+                    i.fas.fa-flask.mr-2
+                    | Dung Tích
+                  th.text-center
+                    i.fas.fa-cog.mr-2
+                    | Thao Tác
+              tbody
+                - let perfumeIndex = 1
+                each p in perfumes
+                  tr(class='hover')
+                    th= perfumeIndex++
+                    td
+                      .font-semibold= p.perfumeName
+                      if p.concentration && p.concentration.toLowerCase() === 'extrait'
+                        .badge.badge-secondary.badge-sm.mt-1 Extrait
+                      else if p.concentration
+                        .badge.badge-ghost.badge-sm.mt-1= p.concentration
+                    td= p.brand && p.brand.brandName
+                    td
+                      .badge.badge-ghost= p.targetAudience
+                    td.font-bold.text-primary= '$' + (typeof p.price === 'number' ? p.price.toFixed(0) : p.price)
+                    td= p.volume + 'ml'
+                    td.text-center
+                      .flex.gap-2.justify-center
+                        a.btn.btn-sm.btn-info(href='/dashboard/perfumes/' + p._id + '/edit')
+                          i.fas.fa-edit
+                        form.inline(method='post', action='/dashboard/perfumes/' + p._id + '/delete', onsubmit='return confirm("Bạn có chắc muốn xóa sản phẩm này?")')
+                          button.btn.btn-sm.btn-error(type='submit')
+                            i.fas.fa-trash
+        else
+          .alert.alert-info
+            i.fas.fa-info-circle
+            span Chưa có sản phẩm nào. Hãy thêm sản phẩm đầu tiên!

@@ -1,0 +1,99 @@
+doctype html
+html(data-theme='business', lang='vi')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title= title || 'Perfume World - Thế Giới Nước Hoa'
+    link(rel='stylesheet', href='/stylesheets/tailwind.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css')
+  body.flex.flex-col.min-h-screen
+    // Navbar
+    .navbar.bg-base-300.shadow-lg
+      .navbar-start
+        a.btn.btn-ghost.text-xl(href='/')
+          i.fas.fa-spray-can.mr-2
+          | Perfume World
+      .navbar-center.hidden(class='lg:flex')
+        ul.menu.menu-horizontal.px-1
+          li
+            a(href='/')
+              i.fas.fa-home.mr-2
+              | Trang chủ
+          if currentUser && currentUser.isAdmin
+            li
+              a(href='/dashboard')
+                i.fas.fa-crown.mr-2
+                | Quản trị
+      .navbar-end
+        if currentUser
+          .dropdown.dropdown-end
+            label.btn.btn-ghost.btn-circle.avatar.placeholder(tabindex='0')
+              .bg-neutral.text-neutral-content.rounded-full.w-10
+                span= currentUser.name.charAt(0).toUpperCase()
+            ul.dropdown-content.menu.p-2.shadow.bg-base-200.rounded-box.w-52.mt-3(tabindex='0')
+              li.menu-title
+                span Xin chào, #{currentUser.name}!
+              li
+                a(href='/me')
+                  i.fas.fa-user.mr-2
+                  | Hồ sơ của tôi
+              li
+                form(action='/logout', method='post')
+                  button.w-full.text-left(type='submit')
+                    i.fas.fa-sign-out-alt.mr-2
+                    | Đăng xuất
+        else
+          .flex.gap-2
+            a.btn.btn-ghost(href='/login')
+              i.fas.fa-sign-in-alt.mr-2
+              | Đăng nhập
+            a.btn.btn-primary(href='/register')
+              i.fas.fa-user-plus.mr-2
+              | Đăng ký
+
+    // Main Content
+    main
+      block content
+
+    // Footer
+    footer.footer.p-10.bg-neutral.text-neutral-content.mt-20.sticky.bottom-0
+      aside
+        i.fas.fa-spray-can.text-4xl.text-primary
+        p.font-bold Perfume World
+        p Khám phá thế giới nước hoa tinh tế
+      nav
+        header.footer-title Liên Kết
+        a.link.link-hover(href='/') Trang chủ
+        a.link.link-hover(href='/about') Về chúng tôi
+        a.link.link-hover(href='/contact') Liên hệ
+      nav
+        header.footer-title Mạng Xã Hội
+        .grid.grid-flow-col.gap-4
+          a(href='https://facebook.com', target='_blank', class='hover:text-primary')
+            i.fab.fa-facebook.text-2xl
+          a(href='https://twitter.com', target='_blank', class='hover:text-primary')
+            i.fab.fa-twitter.text-2xl
+          a(href='https://instagram.com', target='_blank', class='hover:text-primary')
+            i.fab.fa-instagram.text-2xl
+    .footer.footer-center.p-4.bg-base-300.text-base-content.sticky.bottom-0
+      aside
+        p Copyright © 2024 - Perfume World. All rights reserved.
+
+    // Back to top button
+    a#backToTop.btn.btn-circle.btn-primary.fixed.bottom-8.right-8.hidden(href='#')
+      i.fas.fa-arrow-up
+
+    script.
+      window.addEventListener('scroll', function() {
+        const backToTop = document.getElementById('backToTop');
+        if (window.pageYOffset > 300) {
+          backToTop.classList.remove('hidden');
+        } else {
+          backToTop.classList.add('hidden');
+        }
+      });
+      document.getElementById('backToTop').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });

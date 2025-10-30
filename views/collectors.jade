@@ -1,0 +1,74 @@
+extends layout
+
+block content
+  .container.mx-auto.px-4.py-8
+    .text-center.mb-8
+      h1.text-4xl.font-bold.mb-4
+        i.fas.fa-users.mr-3
+        | Danh Sách Thành Viên
+      p.text-lg.opacity-70 Tổng số thành viên: #{members ? members.length : 0}
+
+    if members && members.length
+      .card.bg-base-100.shadow-xl
+        .card-body.p-0
+          .overflow-x-auto
+            table.table.table-zebra
+              thead
+                tr
+                  th 
+                    i.fas.fa-hashtag.mr-2
+                    | STT
+                  th
+                    i.fas.fa-user.mr-2
+                    | Tên
+                  th
+                    i.fas.fa-envelope.mr-2
+                    | Email
+                  th
+                    i.fas.fa-calendar.mr-2
+                    | Năm sinh
+                  th
+                    i.fas.fa-venus-mars.mr-2
+                    | Giới tính
+                  th
+                    i.fas.fa-crown.mr-2
+                    | Vai trò
+                  th
+                    i.fas.fa-clock.mr-2
+                    | Ngày tham gia
+              tbody
+                each m, index in members
+                  tr(class='hover')
+                    th= index + 1
+                    td
+                      .flex.items-center.gap-3
+                        .avatar.placeholder
+                          .bg-neutral.text-neutral-content.rounded-full.w-10
+                            span= m.name.charAt(0).toUpperCase()
+                        .font-bold= m.name
+                    td= m.email
+                    td= m.YOB || 'N/A'
+                    td
+                      if m.gender === true
+                        .badge.badge-info.gap-2
+                          i.fas.fa-mars
+                          | Nam
+                      else if m.gender === false
+                        .badge.badge-secondary.gap-2
+                          i.fas.fa-venus
+                          | Nữ
+                      else
+                        .badge.badge-ghost Không xác định
+                    td
+                      if m.isAdmin
+                        .badge.badge-accent.gap-2
+                          i.fas.fa-crown
+                          | Admin
+                      else
+                        .badge.badge-ghost Thành viên
+                    td
+                      .text-sm.opacity-70= new Date(m.createdAt).toLocaleDateString('vi-VN')
+    else
+      .alert.alert-info.max-w-md.mx-auto
+        i.fas.fa-info-circle
+        span Chưa có thành viên nào

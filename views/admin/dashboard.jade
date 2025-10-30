@@ -1,0 +1,76 @@
+extends ../layout
+
+block content
+  .container.mx-auto.px-4.py-12
+    // Header
+    .text-center.mb-8
+      h1.text-5xl.font-bold.mb-4
+        i.fas.fa-crown.text-primary.mr-3
+        | Quản Trị Hệ Thống
+      p.text-xl.opacity-70 Chào mừng đến với trang quản trị Admin Dashboard
+
+    // Main Management Cards
+    .grid.gap-8.mb-12(class='md:grid-cols-3')
+      // Brands Card
+      .card.bg-base-100.shadow-2xl.transform.transition.duration-300(class='hover:scale-105 hover:shadow-primary/50')
+        .card-body.text-center
+          .mx-auto.bg-primary.bg-opacity-10.w-24.h-24.rounded-full.flex.items-center.justify-center.mb-4
+            i.fas.fa-tag.text-5xl.text-primary
+          h2.card-title.text-2xl.justify-center.mb-3 Quản Lý Thương Hiệu
+          p.text-base.opacity-70.mb-6 Thêm, sửa, xóa các thương hiệu nước hoa
+          .card-actions.justify-center
+            a.btn.btn-primary.btn-wide(href='/dashboard/brands')
+              i.fas.fa-arrow-right.mr-2
+              | Truy Cập
+
+      // Perfumes Card
+      .card.bg-base-100.shadow-2xl.transform.transition.duration-300(class='hover:scale-105 hover:shadow-secondary/50')
+        .card-body.text-center
+          .mx-auto.bg-secondary.bg-opacity-10.w-24.h-24.rounded-full.flex.items-center.justify-center.mb-4
+            i.fas.fa-spray-can.text-5xl.text-secondary
+          h2.card-title.text-2xl.justify-center.mb-3 Quản Lý Sản Phẩm
+          p.text-base.opacity-70.mb-6 Quản lý danh mục sản phẩm nước hoa
+          .card-actions.justify-center
+            a.btn.btn-secondary.btn-wide(href='/dashboard/perfumes')
+              i.fas.fa-arrow-right.mr-2
+              | Truy Cập
+
+      // Members Card
+      .card.bg-base-100.shadow-2xl.transform.transition.duration-300(class='hover:scale-105 hover:shadow-accent/50')
+        .card-body.text-center
+          .mx-auto.bg-accent.bg-opacity-10.w-24.h-24.rounded-full.flex.items-center.justify-center.mb-4
+            i.fas.fa-users.text-5xl.text-accent
+          h2.card-title.text-2xl.justify-center.mb-3 Quản Lý Thành Viên
+          p.text-base.opacity-70.mb-6 Xem và quản lý danh sách thành viên
+          .card-actions.justify-center
+            a.btn.btn-accent.btn-wide(href='/collectors')
+              i.fas.fa-arrow-right.mr-2
+              | Truy Cập
+
+    // Quick Actions
+    .card.bg-base-100.shadow-2xl.mb-8
+      .card-body
+        h2.card-title.text-3xl.mb-6
+          i.fas.fa-bolt.text-warning.mr-3
+          | Thao Tác Nhanh
+        .grid.gap-4(class='md:grid-cols-2 lg:grid-cols-4')
+          a.btn.btn-lg.btn-outline.btn-success.gap-2(href='/dashboard/perfumes/new')
+            i.fas.fa-plus-circle
+            span Thêm Sản Phẩm
+          a.btn.btn-lg.btn-outline.btn-info.gap-2(href='/dashboard/brands')
+            i.fas.fa-plus-circle
+            span Thêm Thương Hiệu
+          a.btn.btn-lg.btn-outline.btn-ghost.gap-2(href='/')
+            i.fas.fa-home
+            span Trang Chủ
+          a.btn.btn-lg.btn-outline.btn-warning.gap-2(href='/me')
+            i.fas.fa-user-circle
+            span Hồ Sơ
+
+    // Info Section
+    .alert.alert-info.shadow-lg
+      div
+        i.fas.fa-info-circle.text-2xl
+      div
+        h3.font-bold.text-lg Chào mừng bạn đến với Admin Dashboard!
+        .text-sm.mt-2 Sử dụng các thẻ bên trên để quản lý thương hiệu, sản phẩm và thành viên của hệ thống. Nhấn vào "Truy Cập" để bắt đầu quản lý.
