@@ -12,6 +12,7 @@ var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
 var adminBrandsRouter = require('./routes/api/brands');
 var adminPerfumesRouter = require('./routes/api/perfumes');
+var adminMembersRouter = require('./routes/api/members');
 
 var app = express();
 
@@ -39,6 +40,7 @@ app.use('/', indexRouter); // Public API endpoints
 app.use('/', authRouter); // Auth API endpoints (with /auth prefix in router)
 app.use('/api/brands', adminBrandsRouter); // Admin Brand API
 app.use('/api/perfumes', adminPerfumesRouter); // Admin Perfume API
+app.use('/api/members', adminMembersRouter); // Admin Members API
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
