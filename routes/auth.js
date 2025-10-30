@@ -49,17 +49,14 @@ var { signToken, requireAuth } = require('../middleware/auth');
  *       400:
  *         description: Email already registered
  */
-// Register
-router.get('/register', (req, res) => {
-  if (req.user) return res.redirect('/');
-  res.render('register', { title: 'Register' });
-});
-
-router.post('/register', async (req, res, next) => {
+// Register API - No GET route needed
+router.post('/auth/register', async (req, res, next) => {
   try {
     const { email, password, name, YOB, gender } = req.body;
     const exists = await Members.findOne({ email });
-    if (exists) return res.status(400).render('register', { title: 'Register', error: 'Email already registered' });
+    if (exists) {
+      return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
     
     // Xử lý gender: chuyển string thành boolean hoặc undefined
     let genderValue;
@@ -71,12 +68,20 @@ router.post('/register', async (req, res, next) => {
       genderValue = undefined;
     }
     
-    console.log('Register Gender:', gender, '-> Converted:', genderValue);
     const member = new Members({ email, password, name, YOB, gender: genderValue, isAdmin: false });
     await member.save();
     const token = signToken(member);
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
-    res.redirect('/');
+    res.json({
+      success: true,
+      message: 'Registration successful',
+      user: {
+        id: member._id,
+        email: member.email,
+        name: member.name,
+        isAdmin: member.isAdmin
+      }
+    });
   } catch (err) {
     next(err);
   }
@@ -84,7 +89,7 @@ router.post('/register', async (req, res, next) => {
 
 /**
  * @swagger
- * /login:
+ * /auth/login:
  *   post:
  *     summary: Login user
  *     tags: [Authentication]
@@ -114,25 +119,43 @@ router.post('/register', async (req, res, next) => {
  *             schema:
  *               type: string
  *               example: token=abcde12345; Path=/; HttpOnly
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/Member'
  *       400:
  *         description: Invalid credentials
  */
-// Login
-router.get('/login', (req, res) => {
-  if (req.user) return res.redirect('/');
-  res.render('login', { title: 'Login' });
-});
-
-router.post('/login', async (req, res, next) => {
+router.post('/auth/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await Members.findOne({ email });
-    if (!user) return res.status(400).render('login', { title: 'Login', error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
+    }
     const ok = await user.comparePassword(password);
-    if (!ok) return res.status(400).render('login', { title: 'Login', error: 'Invalid credentials' });
+    if (!ok) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
+    }
     const token = signToken(user);
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
-    res.redirect('/');
+    res.json({
+      success: true,
+      message: 'Login successful',
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        isAdmin: user.isAdmin
+      }
+    });
   } catch (err) {
     next(err);
   }
@@ -140,7 +163,7 @@ router.post('/login', async (req, res, next) => {
 
 /**
  * @swagger
- * /logout:
+ * /auth/logout:
  *   post:
  *     summary: Logout user
  *     tags: [Authentication]
@@ -152,30 +175,76 @@ router.post('/login', async (req, res, next) => {
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
  *                 message:
  *                   type: string
- *                   example: Logged out
  */
-// Logout
-router.post('/logout', (req, res) => {
+router.post('/auth/logout', (req, res) => {
   res.clearCookie('token');
-  if (req.accepts('html')) return res.redirect('/');
-  res.json({ message: 'Logged out' });
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
-// Current user page
-router.get('/me', requireAuth, async (req, res, next) => {
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Member'
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/auth/me', requireAuth, async (req, res, next) => {
   try {
     const user = await Members.findById(req.user._id).lean();
-    console.log('User data:', user); // Debug log
-    res.render('profile', { title: 'Your Profile', user });
+    res.json({ success: true, data: user });
   } catch (err) {
     next(err);
   }
 });
 
-// Update current user profile
-router.post('/me', requireAuth, async (req, res, next) => {
+/**
+ * @swagger
+ * /auth/me:
+ *   put:
+ *     summary: Update current user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               YOB:
+ *                 type: number
+ *               gender:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Profile updated
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/auth/me', requireAuth, async (req, res, next) => {
   try {
     const { name, YOB, gender } = req.body;
     
@@ -189,23 +258,60 @@ router.post('/me', requireAuth, async (req, res, next) => {
       genderValue = undefined;
     }
     
-    await Members.findByIdAndUpdate(req.user._id, { name, YOB, gender: genderValue });
-    res.redirect('/me');
+    const updatedUser = await Members.findByIdAndUpdate(
+      req.user._id, 
+      { name, YOB, gender: genderValue },
+      { new: true }
+    ).lean();
+    res.json({ success: true, message: 'Profile updated', data: updatedUser });
   } catch (err) {
     next(err);
   }
 });
 
-// Change password
-router.post('/me/password', requireAuth, async (req, res, next) => {
+/**
+ * @swagger
+ * /auth/me/password:
+ *   post:
+ *     summary: Change password
+ *     tags: [Authentication]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password changed
+ *       400:
+ *         description: Current password incorrect
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/auth/me/password', requireAuth, async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const user = await Members.findById(req.user._id);
     const ok = await user.comparePassword(currentPassword);
-    if (!ok) return res.status(400).render('profile', { title: 'Your Profile', user: req.user, error: 'Current password incorrect' });
+    if (!ok) {
+      return res.status(400).json({ success: false, message: 'Current password incorrect' });
+    }
     user.password = newPassword;
     await user.save();
-    res.redirect('/me');
+    res.json({ success: true, message: 'Password changed successfully' });
   } catch (err) {
     next(err);
   }
