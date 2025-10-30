@@ -5,7 +5,7 @@ var { signToken, requireAuth } = require('../middleware/auth');
 
 /**
  * @swagger
- * /register:
+ * /auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
