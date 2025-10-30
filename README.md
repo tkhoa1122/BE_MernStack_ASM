@@ -1,70 +1,218 @@
-# MERN Assignment Backend (Express + Mongoose)
+# Perfume Store REST API
 
-This project implements the assignment requirements with an Express server, Mongoose models, JWT auth, server-rendered Jade views, and admin-protected APIs.
+Node.js REST API backend cho ứng dụng quản lý nước hoa, sử dụng Express + MongoDB + JWT Authentication.
 
-## Features
+## 🚀 Features
 
-- Members: register, login, logout, view/update profile, change password.
-- Password hashing: bcryptjs.
-- JWT auth stored in httpOnly cookie; auto-attached for views.
-- Models:
-  - Members (email, password, name, YOB, gender, isAdmin)
-  - Brands (brandName)
-  - Perfumes (fields per spec + embedded comments)
-  - Comments embedded in Perfumes with one-per-member rule.
-- Public pages:
-  - `/` list perfumes with search (q) and brand filter; populated brandName.
-  - `/perfumes/:id` detail with comments and comment form (login required).
-- Admin-only APIs:
-  - `/api/brands` and `/api/brands/:brandId` CRUD (including GET) admin-only.
-  - `/api/perfumes` and `/api/perfumes/:perfumeId` CRUD (including GET) admin-only.
-- Collectors:
-  - `/collectors` returns all members (admin-only); renders HTML or JSON.
-- UI/UX: Extrait concentration highlighted with a gradient badge.
+- **Authentication**: JWT-based auth with httpOnly cookies
+- **Public Endpoints**: Browse perfumes, view details, add comments
+- **Admin API**: Full CRUD operations for brands and perfumes
+- **Swagger Documentation**: Interactive API docs at `/api-docs`
+- **Cascade Check**: Prevents deletion of referenced entities
+- **Security**: Password hashing with bcryptjs, XSS protection
 
-## Setup
+## 📦 Tech Stack
 
-1. Create `.env` or edit defaults:
+- **Runtime**: Node.js v18+
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (jsonwebtoken) + bcryptjs
+- **Documentation**: Swagger (swagger-jsdoc + swagger-ui-express)
+- **Validation**: Mongoose schema validation
 
-```
+## 🛠️ Setup
+
+### 1. Environment Variables
+
+Create `.env` file:
+
+```env
 MONGODB_URI=mongodb://127.0.0.1:27017/as1
-JWT_SECRET=dev_secret_change_me
+JWT_SECRET=your_secret_key_here
 JWT_EXPIRES_IN=7d
 PORT=3000
-# Optional development helper to promote the first user to admin
-# ALLOW_SELF_ADMIN_SEED=true
+NODE_ENV=development
+# Optional: Enable admin seed helper
+ALLOW_SELF_ADMIN_SEED=true
 ```
 
-2. Install and run:
+### 2. Install & Run
 
-```powershell
+```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000
+Server runs at: http://localhost:3000
+Swagger docs: http://localhost:3000/api-docs
 
-## Admin access
+### 3. Create Admin User
 
-Admin-only APIs require at least one admin user. Create one using MongoDB directly, or enable the development helper by setting `ALLOW_SELF_ADMIN_SEED=true` in `.env`, then:
+**Option 1**: Enable `ALLOW_SELF_ADMIN_SEED=true`, register, then POST to `/make-me-admin`
 
-- Register an account.
-- Send a POST request to `/make-me-admin` while logged in (use REST client or a small HTML form) to promote yourself. Be sure to remove this flag after seeding.
+**Option 2**: Use MongoDB directly:
+```javascript
+db.members.updateOne(
+  { email: "admin@example.com" },
+  { $set: { isAdmin: true } }
+)
+```
 
-## API Notes
+## 📚 API Endpoints
 
-- `/api/brands` and `/api/perfumes` are admin-only for GET/POST/PUT/DELETE per assignment Task 2.
-- Public GETs for listing and viewing perfumes are through the server-rendered pages `/` and `/perfumes/:id`.
+### Public Endpoints
 
-## Data rules
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/` | API info | No |
+| GET | `/perfumes` | List perfumes (search + filter) | No |
+| GET | `/perfumes/:id` | Get perfume details | No |
+| POST | `/perfumes/:id/comments` | Add/update comment | Yes (Member) |
+| DELETE | `/perfumes/:id/comments` | Delete own comment | Yes (Member) |
 
-- Comment: one feedback per perfume per member. Posting again updates the same comment. You can delete your own comment from the detail page.
-- Only members can edit their own information. Not even admins can edit other members via public UI.
+### Authentication Endpoints
 
-## Folder overview
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/register` | Register new user |
+| POST | `/auth/login` | Login (sets JWT cookie) |
+| POST | `/auth/logout` | Logout (clears cookie) |
+| GET | `/auth/me` | Get current user profile |
+| PUT | `/auth/me` | Update profile |
+| POST | `/auth/me/password` | Change password |
 
-- `models/` Mongoose schemas and models
-- `routes/` Express routes (public pages, auth, members, and admin APIs)
-- `views/` Jade templates
-- `public/` static assets and CSS
+### Admin API - Brands
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/brands` | List all brands | Admin |
+| POST | `/api/brands` | Create brand | Admin |
+| PUT | `/api/brands/:id` | Update brand | Admin |
+| DELETE | `/api/brands/:id` | Delete brand* | Admin |
+
+*Cannot delete brand if used by any perfume (cascade check)
+
+### Admin API - Perfumes
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/perfumes` | List all perfumes | Admin |
+| POST | `/api/perfumes` | Create perfume | Admin |
+| PUT | `/api/perfumes/:id` | Update perfume | Admin |
+| DELETE | `/api/perfumes/:id` | Delete perfume | Admin |
+
+## 📖 Response Format
+
+All endpoints return JSON with consistent format:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional success message"
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Error description"
+}
+```
+
+## 🔒 Authentication
+
+JWT token is stored in **httpOnly cookie** named `token`. Frontend should:
+- Include credentials in fetch: `credentials: 'include'`
+- Let browser handle cookies automatically
+- Check `/auth/me` to verify logged-in status
+
+**Example Login:**
+```javascript
+const response = await fetch('/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({ email, password })
+});
+```
+
+## 🗂️ Data Models
+
+### Member
+```javascript
+{
+  email: String (unique, required),
+  password: String (hashed, required),
+  name: String (required),
+  YOB: Number,
+  gender: Boolean, // true=male, false=female
+  isAdmin: Boolean (default: false)
+}
+```
+
+### Brand
+```javascript
+{
+  brandName: String (unique, required)
+}
+```
+
+### Perfume
+```javascript
+{
+  perfumeName: String (required),
+  brand: ObjectId -> Brand (required),
+  category: String,
+  concentration: String (enum),
+  description: String,
+  price: Number (required),
+  fragranceNotes: String,
+  image: String (URL),
+  comments: [
+    {
+      member: ObjectId -> Member,
+      comment: String,
+      createdAt: Date
+    }
+  ]
+}
+```
+
+## 🚀 Deployment (Render)
+
+1. Push code to GitHub
+2. Connect Render to your repo
+3. Configure:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+4. Add environment variables in Render dashboard
+5. Deploy!
+
+## 📝 Project Structure
+
+```
+├── app.js              # Express app setup
+├── models/             # Mongoose schemas
+│   ├── Member.js
+│   ├── Brand.js
+│   └── Perfume.js
+├── routes/             # API routes
+│   ├── index.js        # Public endpoints
+│   ├── auth.js         # Auth endpoints
+│   └── api/
+│       ├── brands.js   # Admin brand CRUD
+│       └── perfumes.js # Admin perfume CRUD
+├── middleware/
+│   ├── auth.js         # JWT authentication
+│   └── cascadeCheck.js # Referential integrity
+├── swagger.js          # Swagger configuration
+└── bin/www             # Server entry point
+```
+
+## 📄 License
+
+MIT
 
