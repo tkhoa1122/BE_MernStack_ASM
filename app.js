@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var { attachUserFromToken } = require('./middleware/auth');
+var setupSwagger = require('./swagger');
 // Xóa dòng import passport
 // var passport = require('passport');
 
@@ -42,6 +43,9 @@ mongoose
 
 // Attach user from JWT cookie (for views and APIs)
 app.use(attachUserFromToken);
+
+// Setup Swagger documentation
+setupSwagger(app);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

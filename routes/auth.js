@@ -3,6 +3,52 @@ var router = express.Router();
 var Members = require('../models/Member');
 var { signToken, requireAuth } = require('../middleware/auth');
 
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - name
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: password123
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               YOB:
+ *                 type: integer
+ *                 example: 1990
+ *               gender:
+ *                 type: string
+ *                 enum: ['true', 'false', '']
+ *                 example: 'true'
+ *     responses:
+ *       200:
+ *         description: Registration successful, JWT cookie set
+ *         headers:
+ *           Set-Cookie:
+ *             schema:
+ *               type: string
+ *               example: token=abcde12345; Path=/; HttpOnly
+ *       400:
+ *         description: Email already registered
+ */
 // Register
 router.get('/register', (req, res) => {
   if (req.user) return res.redirect('/');
@@ -36,6 +82,41 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Login successful, JWT cookie set
+ *         headers:
+ *           Set-Cookie:
+ *             schema:
+ *               type: string
+ *               example: token=abcde12345; Path=/; HttpOnly
+ *       400:
+ *         description: Invalid credentials
+ */
 // Login
 router.get('/login', (req, res) => {
   if (req.user) return res.redirect('/');
@@ -57,6 +138,24 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logged out
+ */
 // Logout
 router.post('/logout', (req, res) => {
   res.clearCookie('token');
